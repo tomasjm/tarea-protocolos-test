@@ -1,0 +1,2 @@
+sudo ./test b8:27:eb:15:b1:ca 11:27:bb:44:b1:ca 0 2 3 1
+sudo ./test 11:27:bb:44:b1:ca b8:27:eb:15:b1:ca 23 22 21
