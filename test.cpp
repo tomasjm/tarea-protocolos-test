@@ -51,7 +51,7 @@ int main(int argc, char *args[])
       if(wiringPiISR(CLOCK_PIN_SEND, INT_EDGE_RISING, &cbSend) < 0){
     printf("Unable to start interrupt function\n");
   }
-    if (wiringPiISR(CLOCK_PIN_RECEIVE, INT_EDGE_FALLING, &cbReceive) < 0)
+    if (wiringPiISR(CLOCK_PIN_RECEIVE, INT_EDGE_RISING, &cbReceive) < 0)
     {
         printf("Unable to start interrupt function\n");
     }
