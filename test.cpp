@@ -5,15 +5,6 @@
 #include "slip.h"
 #include <string.h>
 
-//MACROS
-#define CLOCK_PIN_SEND 0
-#define TX_PIN_SEND 2
-#define RX_PIN_SEND 3
-
-#define CLOCK_PIN_RECEIVE 23
-#define TX_PIN_RECEIVE 22
-#define RX_PIN_RECEIVE 21
-
 #define BYTE unsigned char
 
 //PROTOTIPOS
@@ -43,16 +34,40 @@ int nones = 0;
 bool transmissionStartedSend = false;
 int endCount = 0;
 
+char macOrigin[18];
+char macDestiny[18];
+int txPin;
+int rxPin;
+int clockPin;
 int main(int argc, char *args[])
 {
+  if (argc >= 6) {
+    memcpy(macOrigin, args[1], sizeof(macOrigin));
+    memcpy(macDestiny, args[2], sizeof(macDestiny));
+    clockPin = atoi(args[3]);
+    txPin = atoi(args[4]);
+    rxPin = atoi(args[5]);
+  } else {
+    exit(1);
+  }
+  printf("%s | %s \n", macOrigin, macDestiny);
+  printf("%d | %d | %d \n", clockPin, txPin, rxPin);
   //INICIA WIRINGPI
   if (wiringPiSetup() == -1)
     exit(1);
-  
-  wiringPiISR(CLOCK_PIN_RECEIVE, INT_EDGE_FALLING, &cbReceive);
-  wiringPiISR(CLOCK_PIN_SEND, INT_EDGE_RISING, &cbSend);
-  if (argc > 1 && atoi(args[1]) == 1)
+
+  wiringPiISR(clockPin, INT_EDGE_FALLING, &cbReceive);
+  wiringPiISR(clockPin, INT_EDGE_RISING, &cbSend);
+  if (argc >= 7 && atoi(args[6]) == 1)
   {
+    empaquetaSlip(slipArrayToSend, bytesToSend, 10);
+    printf("Paquete slip: ");
+    printByteArray(slipArrayToSend, 20);
+
+    //TRANSMITE EL MENSAJE
+    startTransmission();
+    while (transmissionStartedSend)
+      delay(2000);
   }
   else
   {
@@ -86,7 +101,7 @@ int main(int argc, char *args[])
 
 void cbReceive(void)
 {
-  bool level = digitalRead(RX_PIN_RECEIVE);
+  bool level = digitalRead(rxPin);
   processBit(level);
 }
 
@@ -144,7 +159,7 @@ void cbSend(void)
     }
 
     //Escribe en el pin TX
-    digitalWrite(TX_PIN_SEND, (slipArrayToSend[nbytesSend] >> nbitsSend) & 0x01); //Bit de dato
+    digitalWrite(txPin, (slipArrayToSend[nbytesSend] >> nbitsSend) & 0x01); //Bit de dato
 
     //Actualiza contador de bits
     nbitsSend++;
@@ -168,6 +183,6 @@ void cbSend(void)
   else
   {
     //Canal en reposo
-    digitalWrite(TX_PIN_RECEIVE, 1);
+    digitalWrite(txPin, 1);
   }
 }
