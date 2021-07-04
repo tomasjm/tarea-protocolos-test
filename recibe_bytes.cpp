@@ -95,7 +95,7 @@ void processBit(bool level){
       // printf("0x%x\n", bytesReceived[nbytesReceived]);
       if(bytesReceived[nbytesReceived] == 0xC0 && nbytesReceived>0){
         transmissionStarted = false;
-        memcpy((void*)slipArrayReceived, (void*)bytes, nbytesReceived+1);
+        memcpy((void*)slipArrayReceived, (void*)bytesReceived, nbytesReceived+1);
         nbytesReceived = 0;
         frameReceived = true;
         return;
