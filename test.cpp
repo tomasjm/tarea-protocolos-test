@@ -127,35 +127,35 @@ void processBit(bool level){
 }
 
 void cbSend(void){
-  if(transmissionStartedSend){
-    if(endCount == 0 && slipArrayToSend[nbytesSend] != 0xC0){
-      nbytesSend++;
-      return;
-    }
+  // if(transmissionStartedSend){
+  //   if(endCount == 0 && slipArrayToSend[nbytesSend] != 0xC0){
+  //     nbytesSend++;
+  //     return;
+  //   }
 
-    //Escribe en el pin TX
-    digitalWrite(txPin, (slipArrayToSend[nbytesSend] >> nbitsSend) & 0x01); //Bit de dato
+  //   //Escribe en el pin TX
+  //   digitalWrite(txPin, (slipArrayToSend[nbytesSend] >> nbitsSend) & 0x01); //Bit de dato
 
-    //Actualiza contador de bits
-    nbitsSend++;
+  //   //Actualiza contador de bits
+  //   nbitsSend++;
 
-    //Actualiza contador de bytes
-    if(nbitsSend == 8){
-      nbitsSend = 0;
-      endCount += slipArrayToSend[nbytesSend] == 0xC0;
-      //Finaliza la comunicación
-      if(slipArrayToSend[nbytesSend] == 0xC0 && endCount>1){
-        endCount = 0;
-        nbytesSend = 0;
-        transmissionStartedSend = false;
-        return;
-      }
-      nbytesSend++;      
-    }
-  }else{
-    //Canal en reposo
-    //digitalWrite(txPin, 1);
-  }
+  //   //Actualiza contador de bytes
+  //   if(nbitsSend == 8){
+  //     nbitsSend = 0;
+  //     endCount += slipArrayToSend[nbytesSend] == 0xC0;
+  //     //Finaliza la comunicación
+  //     if(slipArrayToSend[nbytesSend] == 0xC0 && endCount>1){
+  //       endCount = 0;
+  //       nbytesSend = 0;
+  //       transmissionStartedSend = false;
+  //       return;
+  //     }
+  //     nbytesSend++;      
+  //   }
+  // }else{
+  //   //Canal en reposo
+  //   //digitalWrite(txPin, 1);
+  // }
 }
 
 void startTransmission(){
