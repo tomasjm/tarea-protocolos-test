@@ -168,6 +168,6 @@ void cbSend(void)
   else
   {
     //Canal en reposo
-    digitalWrite(TX_PIN_SEND, 1);
+    //digitalWrite(TX_PIN_SEND, 1);
   }
 }
