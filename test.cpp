@@ -41,15 +41,7 @@ int main(int argc, char *args[])
     }
     if (argc > 1 && atoi(args[1]) == 1)
     {
-        //EMPAQUETA EN SLIP
-        empaquetaSlip(slipArrayToSend, bytesToSend, 10);
-        printf("Paquete slip: ");
-        printByteArray(slipArrayToSend, 20);
 
-        //TRANSMITE EL MENSAJE
-        startTransmission();
-        while (transmissionStartedSend)
-            delay(2000);
     }
     else
     {
