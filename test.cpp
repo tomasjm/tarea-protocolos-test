@@ -5,6 +5,16 @@
 #include "slip.h"
 #include <string.h>
 
+//MACROS
+#define CLOCK_PIN_SEND 0
+#define TX_PIN_SEND 2
+#define RX_PIN_SEND 3
+
+#define CLOCK_PIN_RECEIVE 23
+#define TX_PIN_RECEIVE 22
+#define RX_PIN_RECEIVE 21
+
+
 #define BYTE unsigned char
 
 //PROTOTIPOS
@@ -41,7 +51,7 @@ int rxPin;
 int clockPin;
 int main(int argc, char *args[])
 {
-  if (argc >= 6) {
+  if (argc > 5) {
     memcpy(macOrigin, args[1], sizeof(macOrigin));
     memcpy(macDestiny, args[2], sizeof(macDestiny));
     clockPin = atoi(args[3]);
@@ -50,15 +60,16 @@ int main(int argc, char *args[])
   } else {
     exit(1);
   }
-  printf("%s | %s \n", macOrigin, macDestiny);
-  printf("%d | %d | %d \n", clockPin, txPin, rxPin);
+  //CONFIGURA PINES DE ENTRADA SALIDA
+  pinMode(rxPin, INPUT);
+  pinMode(txPin, OUTPUT);
   //INICIA WIRINGPI
   if (wiringPiSetup() == -1)
     exit(1);
 
   wiringPiISR(clockPin, INT_EDGE_FALLING, &cbReceive);
   wiringPiISR(clockPin, INT_EDGE_RISING, &cbSend);
-  if (argc >= 7 && atoi(args[6]) == 1)
+  if (argc > 1 && atoi(args[1]) == 1)
   {
     empaquetaSlip(slipArrayToSend, bytesToSend, 10);
     printf("Paquete slip: ");
@@ -183,17 +194,6 @@ void cbSend(void)
   else
   {
     //Canal en reposo
-    //digitalWrite(txPin, 1);
+    digitalWrite(txPin, 1);
   }
-}
-
-void startTransmission(){
-  transmissionStartedSend = true;
-}
-
-void printByteArray(BYTE* arr, int len){
-  for(int i = 0; i<len; i++){
-    printf("0x%x ", arr[i]);
-  }
-  printf("\n");
 }
