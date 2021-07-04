@@ -31,11 +31,11 @@ BYTE slipArrayReceived[50];
 //DECLARACION DE PROTOTIPOS
 void cbSend(void);
 void startTransmission();
-void printByteArray(BYTE* arr, int len);
+void printByteArray(BYTE *arr, int len);
 
 //VARIABLES GLOBALES
 volatile int nbitsSend = 0;
-BYTE bytesToSend[10] = {1,2,3,4,5,6,7,8,9,10};
+BYTE bytesToSend[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 BYTE slipArrayToSend[20];
 volatile int nbytesSend = 0;
 BYTE len = 10;
@@ -45,62 +45,57 @@ int endCount = 0;
 
 int main(int argc, char *args[])
 {
-    //INICIA WIRINGPI
-    if (wiringPiSetup() == -1)
-        exit(1);
-      if(wiringPiISR(CLOCK_PIN_SEND, INT_EDGE_RISING, &cbSend) < 0){
-    printf("Unable to start interrupt function\n");
+  //INICIA WIRINGPI
+  if (wiringPiSetup() == -1)
+    exit(1);
+  wiringPiISR(CLOCK_PIN_SEND, INT_EDGE_BOTH, &cbSend);
+  wiringPiISR(CLOCK_PIN_RECEIVE, INT_EDGE_BOTH, &cbReceive);
+  if (argc > 1 && atoi(args[1]) == 1)
+  {
   }
-    if (wiringPiISR(CLOCK_PIN_RECEIVE, INT_EDGE_RISING, &cbReceive) < 0)
+  else
+  {
+    piHiPri(99);
+    for (int i = 0; i < 50; i++)
     {
-        printf("Unable to start interrupt function\n");
-    }
-    if (argc > 1 && atoi(args[1]) == 1)
-    {
-
-    }
-    else
-    {
-        piHiPri(99);
-        for (int i = 0; i < 50; i++)
-        {
-            bytesReceived[i] = 0;
-        }
-
-        printf("Delay\n");
-        while (!frameReceived)
-            delay(300);
-
-        printf("Frame slip recibido!\n");
-        BYTE data[50];
-        for (int i = 0; i < 50; i++)
-        {
-            printf("Byte %d: 0x%x\n", i, slipArrayReceived[i]);
-        }
-        int len = desempaquetaSlip(data, slipArrayReceived);
-
-        printf("\nData:\n");
-        for (int i = 0; i < len; i++)
-        {
-            printf("Byte %d: %d\n", i, data[i]);
-        }
+      bytesReceived[i] = 0;
     }
 
-    return 0;
+    printf("Delay\n");
+    while (!frameReceived)
+      delay(300);
+
+    printf("Frame slip recibido!\n");
+    BYTE data[50];
+    for (int i = 0; i < 50; i++)
+    {
+      printf("Byte %d: 0x%x\n", i, slipArrayReceived[i]);
+    }
+    int len = desempaquetaSlip(data, slipArrayReceived);
+
+    printf("\nData:\n");
+    for (int i = 0; i < len; i++)
+    {
+      printf("Byte %d: %d\n", i, data[i]);
+    }
+  }
+
+  return 0;
 }
 
-
-
-void cbReceive(void){
+void cbReceive(void)
+{
   bool level = digitalRead(RX_PIN_RECEIVE);
   processBit(level);
 }
 
-void processBit(bool level){
+void processBit(bool level)
+{
 
   //Inserta nuevo bit en byte actual
   BYTE pos = nbitsReceived;
-  if(nbitsReceived>7){
+  if (nbitsReceived > 7)
+  {
     pos = 7;
     bytesReceived[nbytesReceived] = bytesReceived[nbytesReceived] >> 1;
     bytesReceived[nbytesReceived] &= 0x7f;
@@ -108,7 +103,8 @@ void processBit(bool level){
   bytesReceived[nbytesReceived] |= level << pos;
 
   //Verifica si comienza transmisión
-  if(!transmissionStartedReceive && bytesReceived[nbytesReceived] == 0xC0){
+  if (!transmissionStartedReceive && bytesReceived[nbytesReceived] == 0xC0)
+  {
     transmissionStartedReceive = true;
     nbitsReceived = 0;
     nbytesReceived++;
@@ -118,13 +114,16 @@ void processBit(bool level){
 
   //Actualiza contadores y banderas
   nbitsReceived++;
-  if(transmissionStartedReceive){
-    if(nbitsReceived==8){
+  if (transmissionStartedReceive)
+  {
+    if (nbitsReceived == 8)
+    {
       nbitsReceived = 0;
       // printf("0x%x\n", bytesReceived[nbytesReceived]);
-      if(bytesReceived[nbytesReceived] == 0xC0 && nbytesReceived>0){
+      if (bytesReceived[nbytesReceived] == 0xC0 && nbytesReceived > 0)
+      {
         transmissionStartedReceive = false;
-        memcpy((void*)slipArrayReceived, (void*)bytesReceived, nbytesReceived+1);
+        memcpy((void *)slipArrayReceived, (void *)bytesReceived, nbytesReceived + 1);
         nbytesReceived = 0;
         frameReceived = true;
         return;
@@ -133,9 +132,12 @@ void processBit(bool level){
     }
   }
 }
-void cbSend(void){
-  if(transmissionStartedSend){
-    if(endCount == 0 && slipArrayToSend[nbytesSend] != 0xC0){
+void cbSend(void)
+{
+  if (transmissionStartedSend)
+  {
+    if (endCount == 0 && slipArrayToSend[nbytesSend] != 0xC0)
+    {
       nbytesSend++;
       return;
     }
@@ -147,19 +149,23 @@ void cbSend(void){
     nbitsSend++;
 
     //Actualiza contador de bytes
-    if(nbitsSend == 8){
+    if (nbitsSend == 8)
+    {
       nbitsSend = 0;
       endCount += slipArrayToSend[nbytesSend] == 0xC0;
       //Finaliza la comunicación
-      if(slipArrayToSend[nbytesSend] == 0xC0 && endCount>1){
+      if (slipArrayToSend[nbytesSend] == 0xC0 && endCount > 1)
+      {
         endCount = 0;
         nbytesSend = 0;
         transmissionStartedSend = false;
         return;
       }
-      nbytesSend++;      
+      nbytesSend++;
     }
-  }else{
+  }
+  else
+  {
     //Canal en reposo
     digitalWrite(TX_PIN_SEND, 1);
   }
