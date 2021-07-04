@@ -14,7 +14,6 @@
 #define TX_PIN_RECEIVE 22
 #define RX_PIN_RECEIVE 21
 
-
 #define BYTE unsigned char
 
 //PROTOTIPOS
@@ -44,41 +43,16 @@ int nones = 0;
 bool transmissionStartedSend = false;
 int endCount = 0;
 
-char macOrigin[18];
-char macDestiny[18];
-int txPin;
-int rxPin;
-int clockPin;
 int main(int argc, char *args[])
 {
-  if (argc > 5) {
-    memcpy(macOrigin, args[1], sizeof(macOrigin));
-    memcpy(macDestiny, args[2], sizeof(macDestiny));
-    clockPin = atoi(args[3]);
-    txPin = atoi(args[4]);
-    rxPin = atoi(args[5]);
-  } else {
-    exit(1);
-  }
-  //CONFIGURA PINES DE ENTRADA SALIDA
-
   //INICIA WIRINGPI
   if (wiringPiSetup() == -1)
     exit(1);
-  pinMode(rxPin, INPUT);
-  pinMode(txPin, OUTPUT);
-  wiringPiISR(clockPin, INT_EDGE_FALLING, &cbReceive);
-  wiringPiISR(clockPin, INT_EDGE_RISING, &cbSend);
+  
+  wiringPiISR(CLOCK_PIN_RECEIVE, INT_EDGE_FALLING, &cbReceive);
+  wiringPiISR(CLOCK_PIN_RECEIVE, INT_EDGE_RISING, &cbSend);
   if (argc > 1 && atoi(args[1]) == 1)
   {
-    empaquetaSlip(slipArrayToSend, bytesToSend, 10);
-    printf("Paquete slip: ");
-    printByteArray(slipArrayToSend, 20);
-
-    //TRANSMITE EL MENSAJE
-    startTransmission();
-    while (transmissionStartedSend)
-      delay(2000);
   }
   else
   {
@@ -112,7 +86,7 @@ int main(int argc, char *args[])
 
 void cbReceive(void)
 {
-  bool level = digitalRead(rxPin);
+  bool level = digitalRead(RX_PIN_RECEIVE);
   processBit(level);
 }
 
@@ -170,7 +144,7 @@ void cbSend(void)
     }
 
     //Escribe en el pin TX
-    digitalWrite(txPin, (slipArrayToSend[nbytesSend] >> nbitsSend) & 0x01); //Bit de dato
+    digitalWrite(TX_PIN_RECEIVE, (slipArrayToSend[nbytesSend] >> nbitsSend) & 0x01); //Bit de dato
 
     //Actualiza contador de bits
     nbitsSend++;
@@ -194,17 +168,6 @@ void cbSend(void)
   else
   {
     //Canal en reposo
-    digitalWrite(txPin, 1);
+    digitalWrite(TX_PIN_RECEIVE, 1);
   }
-}
-
-void startTransmission(){
-  transmissionStartedSend = true;
-}
-
-void printByteArray(BYTE* arr, int len){
-  for(int i = 0; i<len; i++){
-    printf("0x%x ", arr[i]);
-  }
-  printf("\n");
 }
