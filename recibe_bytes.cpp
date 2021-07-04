@@ -14,14 +14,15 @@
 
 //PROTOTIPOS
 void processBit(bool level);
-void cbReceive(void);
+void cb(void);
 
 //VARIABLES GLOBALES
-volatile int nbitsReceive = 0;
-volatile int nbytesReceive = 0;
-bool transmissionStartedReceive = false;
+volatile int nbitsReceived = 0;
+volatile int nbytesReceived = 0;
+bool transmissionStarted = false;
 bool frameReceived = false;
-BYTE slipFrame[50];
+BYTE bytesReceived[50];
+BYTE slipArrayReceived[50];
 
 int main(){
   if(wiringPiSetup() == -1){
@@ -34,10 +35,13 @@ int main(){
   pinMode(TX_PIN_RECEIVE, OUTPUT);
 
   //CONFIGURA INTERRUPCION PIN CLOCK (PUENTEADO A PIN PWM)
-  if(wiringPiISR(CLOCK_PIN_RECEIVE, INT_EDGE_FALLING, &cbReceive) < 0){
+  if(wiringPiISR(CLOCK_PIN_RECEIVE, INT_EDGE_FALLING, &cb) < 0){
     printf("Unable to start interrupt function\n");
   }
 
+  for(int i = 0; i<50; i++){
+    bytes[i] = 0;
+  }
 
   printf("Delay\n");
   while(!frameReceived)
@@ -46,9 +50,9 @@ int main(){
   printf("Frame slip recibido!\n");
   BYTE data[50];
   for(int i = 0; i<50; i++){
-    printf("Byte %d: 0x%x\n", i, slipFrame[i]);
+    printf("Byte %d: 0x%x\n", i, slipArrayReceived[i]);
   }
-  int len = desempaquetaSlip(data, slipFrame);
+  int len = desempaquetaSlip(data, slipArrayReceived);
   
   printf("\nData:\n");
   for(int i = 0; i<len; i++){
@@ -58,7 +62,7 @@ int main(){
   return 0;
 }
 
-void cbReceive(void){
+void cb(void){
   bool level = digitalRead(RX_PIN_RECEIVE);
   processBit(level);
 }
@@ -66,37 +70,37 @@ void cbReceive(void){
 void processBit(bool level){
 
   //Inserta nuevo bit en byte actual
-  BYTE pos = nbitsReceive;
-  if(nbitsReceive>7){
+  BYTE pos = nbitsReceived;
+  if(nbitsReceived>7){
     pos = 7;
-    bytes[nbytesReceive] = bytes[nbytesReceive] >> 1;
-    bytes[nbytesReceive] &= 0x7f;
+    bytes[nbytesReceived] = bytes[nbytesReceived] >> 1;
+    bytes[nbytesReceived] &= 0x7f;
   }
-  bytes[nbytesReceive] |= level << pos;
+  bytes[nbytesReceived] |= level << pos;
 
   //Verifica si comienza transmisión
-  if(!transmissionStartedReceive && bytes[nbytesReceive] == 0xC0){
-    transmissionStartedReceive = true;
-    nbitsReceive = 0;
-    nbytesReceive++;
+  if(!transmissionStarted && bytes[nbytesReceived] == 0xC0){
+    transmissionStarted = true;
+    nbitsReceived = 0;
+    nbytesReceived++;
     // printf("Encuentra 0xc0\n");
     return;
   }
 
   //Actualiza contadores y banderas
-  nbitsReceive++;
-  if(transmissionStartedReceive){
-    if(nbitsReceive==8){
-      nbitsReceive = 0;
-      // printf("0x%x\n", bytes[nbytesReceive]);
-      if(bytes[nbytesReceive] == 0xC0 && nbytesReceive>0){
-        transmissionStartedReceive = false;
-        memcpy((void*)slipFrame, (void*)bytes, nbytesReceive+1);
-        nbytesReceive = 0;
+  nbitsReceived++;
+  if(transmissionStarted){
+    if(nbitsReceived==8){
+      nbitsReceived = 0;
+      // printf("0x%x\n", bytes[nbytesReceived]);
+      if(bytes[nbytesReceived] == 0xC0 && nbytesReceived>0){
+        transmissionStarted = false;
+        memcpy((void*)slipArrayReceived, (void*)bytes, nbytesReceived+1);
+        nbytesReceived = 0;
         frameReceived = true;
         return;
       }
-      nbytesReceive++;
+      nbytesReceived++;
     }
   }
 }
