@@ -40,7 +40,7 @@ int main(){
   }
 
   for(int i = 0; i<50; i++){
-    bytes[i] = 0;
+    bytesReceived[i] = 0;
   }
 
   printf("Delay\n");
@@ -73,13 +73,13 @@ void processBit(bool level){
   BYTE pos = nbitsReceived;
   if(nbitsReceived>7){
     pos = 7;
-    bytes[nbytesReceived] = bytes[nbytesReceived] >> 1;
-    bytes[nbytesReceived] &= 0x7f;
+    bytesReceived[nbytesReceived] = bytesReceived[nbytesReceived] >> 1;
+    bytesReceived[nbytesReceived] &= 0x7f;
   }
-  bytes[nbytesReceived] |= level << pos;
+  bytesReceived[nbytesReceived] |= level << pos;
 
   //Verifica si comienza transmisión
-  if(!transmissionStarted && bytes[nbytesReceived] == 0xC0){
+  if(!transmissionStarted && bytesReceived[nbytesReceived] == 0xC0){
     transmissionStarted = true;
     nbitsReceived = 0;
     nbytesReceived++;
@@ -92,8 +92,8 @@ void processBit(bool level){
   if(transmissionStarted){
     if(nbitsReceived==8){
       nbitsReceived = 0;
-      // printf("0x%x\n", bytes[nbytesReceived]);
-      if(bytes[nbytesReceived] == 0xC0 && nbytesReceived>0){
+      // printf("0x%x\n", bytesReceived[nbytesReceived]);
+      if(bytesReceived[nbytesReceived] == 0xC0 && nbytesReceived>0){
         transmissionStarted = false;
         memcpy((void*)slipArrayReceived, (void*)bytes, nbytesReceived+1);
         nbytesReceived = 0;
