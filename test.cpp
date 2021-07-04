@@ -52,12 +52,12 @@ int main(){
   //CONFIGURA PINES DE ENTRADA SALIDA
   
   //CONFIGURA INTERRUPCION PIN CLOCK (PUENTEADO A PIN PWM)
-  if(wiringPiISR(clockPin, INT_EDGE_FALLING, &cbReceive) < 0){
+  if(wiringPiISR(clockPin, INT_EDGE_BOTH, &cbReceive) < 0){
     printf("Unable to start interrupt function\n");
   }
-  if(wiringPiISR(clockPin1, INT_EDGE_RISING, &cbSend) < 0){
-    printf("Unable to start interrupt function\n");
-  }
+  // if(wiringPiISR(clockPin1, INT_EDGE_RISING, &cbSend) < 0){
+  //   printf("Unable to start interrupt function\n");
+  // }
   pinMode(rxPin, INPUT);
   pinMode(txPin, OUTPUT);
 
@@ -87,6 +87,35 @@ int main(){
 void cbReceive(void){
   bool level = digitalRead(rxPin);
   processBit(level);
+  if(transmissionStartedSend){
+    if(endCount == 0 && slipArrayToSend[nbytesSend] != 0xC0){
+      nbytesSend++;
+      return;
+    }
+
+    //Escribe en el pin TX
+    digitalWrite(txPin, (slipArrayToSend[nbytesSend] >> nbitsSend) & 0x01); //Bit de dato
+
+    //Actualiza contador de bits
+    nbitsSend++;
+
+    //Actualiza contador de bytes
+    if(nbitsSend == 8){
+      nbitsSend = 0;
+      endCount += slipArrayToSend[nbytesSend] == 0xC0;
+      //Finaliza la comunicación
+      if(slipArrayToSend[nbytesSend] == 0xC0 && endCount>1){
+        endCount = 0;
+        nbytesSend = 0;
+        transmissionStartedSend = false;
+        return;
+      }
+      nbytesSend++;      
+    }
+  }else{
+    //Canal en reposo
+    digitalWrite(txPin, 1);
+  }
 }
 
 void processBit(bool level){
@@ -127,37 +156,9 @@ void processBit(bool level){
   }
 }
 
-void cbSend(void){
-  if(transmissionStartedSend){
-    if(endCount == 0 && slipArrayToSend[nbytesSend] != 0xC0){
-      nbytesSend++;
-      return;
-    }
-
-    //Escribe en el pin TX
-    digitalWrite(txPin, (slipArrayToSend[nbytesSend] >> nbitsSend) & 0x01); //Bit de dato
-
-    //Actualiza contador de bits
-    nbitsSend++;
-
-    //Actualiza contador de bytes
-    if(nbitsSend == 8){
-      nbitsSend = 0;
-      endCount += slipArrayToSend[nbytesSend] == 0xC0;
-      //Finaliza la comunicación
-      if(slipArrayToSend[nbytesSend] == 0xC0 && endCount>1){
-        endCount = 0;
-        nbytesSend = 0;
-        transmissionStartedSend = false;
-        return;
-      }
-      nbytesSend++;      
-    }
-  }else{
-    //Canal en reposo
-    digitalWrite(txPin, 1);
-  }
-}
+// void cbSend(void){
+  
+// }
 
 void startTransmission(){
   transmissionStartedSend = true;
