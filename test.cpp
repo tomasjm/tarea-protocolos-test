@@ -51,7 +51,7 @@ int main(int argc, char *args[])
     exit(1);
   }
   printf("%s | %s \n", macOrigin, macDestiny);
-  printf("%d | %d | %d \n", clockPin, txPin, rxPins);
+  printf("%d | %d | %d \n", clockPin, txPin, rxPin);
   //INICIA WIRINGPI
   if (wiringPiSetup() == -1)
     exit(1);
