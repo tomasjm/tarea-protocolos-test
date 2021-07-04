@@ -186,3 +186,14 @@ void cbSend(void)
     digitalWrite(txPin, 1);
   }
 }
+
+void startTransmission(){
+  transmissionStartedSend = true;
+}
+
+void printByteArray(BYTE* arr, int len){
+  for(int i = 0; i<len; i++){
+    printf("0x%x ", arr[i]);
+  }
+  printf("\n");
+}
