@@ -6,7 +6,7 @@
 #include <string.h>
 
 //MACROS
-#define clockPin1 0
+#define clockPin1      0
 #define clockPin       23
 #define txPin          22
 #define rxPin          21
@@ -55,7 +55,7 @@ int main(){
   if(wiringPiISR(clockPin, INT_EDGE_BOTH, &cbReceive) < 0){
     printf("Unable to start interrupt function\n");
   }
-  if(wiringPiISR(clockPin1, INT_EDGE_BOTH, &cbSend) < 0){
+  if(wiringPiISR(clockPin, INT_EDGE_BOTH, &cbSend) < 0){
     printf("Unable to start interrupt function\n");
   }
   pinMode(rxPin, INPUT);
