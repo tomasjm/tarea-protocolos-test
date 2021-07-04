@@ -14,12 +14,12 @@
 
 //PROTOTIPOS
 void processBit(bool level);
-void cb(void);
+void cbReceive(void);
 
 //VARIABLES GLOBALES
 volatile int nbitsReceived = 0;
 volatile int nbytesReceived = 0;
-bool transmissionStarted = false;
+bool transmissionStartedReceive = false;
 bool frameReceived = false;
 BYTE bytesReceived[50];
 BYTE slipArrayReceived[50];
@@ -35,7 +35,7 @@ int main(){
   pinMode(TX_PIN_RECEIVE, OUTPUT);
 
   //CONFIGURA INTERRUPCION PIN CLOCK (PUENTEADO A PIN PWM)
-  if(wiringPiISR(CLOCK_PIN_RECEIVE, INT_EDGE_FALLING, &cb) < 0){
+  if(wiringPiISR(CLOCK_PIN_RECEIVE, INT_EDGE_FALLING, &cbReceive) < 0){
     printf("Unable to start interrupt function\n");
   }
 
@@ -62,7 +62,7 @@ int main(){
   return 0;
 }
 
-void cb(void){
+void cbReceive(void){
   bool level = digitalRead(RX_PIN_RECEIVE);
   processBit(level);
 }
@@ -79,8 +79,8 @@ void processBit(bool level){
   bytesReceived[nbytesReceived] |= level << pos;
 
   //Verifica si comienza transmisión
-  if(!transmissionStarted && bytesReceived[nbytesReceived] == 0xC0){
-    transmissionStarted = true;
+  if(!transmissionStartedReceive && bytesReceived[nbytesReceived] == 0xC0){
+    transmissionStartedReceive = true;
     nbitsReceived = 0;
     nbytesReceived++;
     // printf("Encuentra 0xc0\n");
@@ -89,12 +89,12 @@ void processBit(bool level){
 
   //Actualiza contadores y banderas
   nbitsReceived++;
-  if(transmissionStarted){
+  if(transmissionStartedReceive){
     if(nbitsReceived==8){
       nbitsReceived = 0;
       // printf("0x%x\n", bytesReceived[nbytesReceived]);
       if(bytesReceived[nbytesReceived] == 0xC0 && nbytesReceived>0){
-        transmissionStarted = false;
+        transmissionStartedReceive = false;
         memcpy((void*)slipArrayReceived, (void*)bytesReceived, nbytesReceived+1);
         nbytesReceived = 0;
         frameReceived = true;
