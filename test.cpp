@@ -101,7 +101,6 @@ int main(int argc, char *args[])
 
 void cbReceive(void)
 {
-  printf("pin %d\n", rxPin);
   bool level = digitalRead(rxPin);
   processBit(level);
 }
@@ -184,7 +183,7 @@ void cbSend(void)
   else
   {
     //Canal en reposo
-    digitalWrite(txPin, 1);
+    //digitalWrite(txPin, 1);
   }
 }
 
