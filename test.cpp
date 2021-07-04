@@ -101,6 +101,7 @@ int main(int argc, char *args[])
 
 void cbReceive(void)
 {
+  printf("pin %d\n", rxPin);
   bool level = digitalRead(rxPin);
   processBit(level);
 }
