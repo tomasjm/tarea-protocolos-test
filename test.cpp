@@ -61,12 +61,12 @@ int main(int argc, char *args[])
     exit(1);
   }
   //CONFIGURA PINES DE ENTRADA SALIDA
-  pinMode(rxPin, INPUT);
-  pinMode(txPin, OUTPUT);
+
   //INICIA WIRINGPI
   if (wiringPiSetup() == -1)
     exit(1);
-
+  pinMode(rxPin, INPUT);
+  pinMode(txPin, OUTPUT);
   wiringPiISR(clockPin, INT_EDGE_FALLING, &cbReceive);
   wiringPiISR(clockPin, INT_EDGE_RISING, &cbSend);
   if (argc > 1 && atoi(args[1]) == 1)
