@@ -48,6 +48,8 @@ int main(int argc, char *args[])
   //INICIA WIRINGPI
   if (wiringPiSetup() == -1)
     exit(1);
+  pinMode(RX_PIN_RECEIVE, INPUT);
+  pinMode(TX_PIN_RECEIVE, OUTPUT);
   
   wiringPiISR(CLOCK_PIN_RECEIVE, INT_EDGE_FALLING, &cbReceive);
   wiringPiISR(CLOCK_PIN_RECEIVE, INT_EDGE_RISING, &cbSend);
