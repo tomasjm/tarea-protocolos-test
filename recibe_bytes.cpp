@@ -69,13 +69,13 @@ void processBit(bool level){
   BYTE pos = nbitsReceive;
   if(nbitsReceive>7){
     pos = 7;
-    slipFrame[nbytesReceive] = slipFrame[nbytesReceive] >> 1;
-    slipFrame[nbytesReceive] &= 0x7f;
+    bytes[nbytesReceive] = bytes[nbytesReceive] >> 1;
+    bytes[nbytesReceive] &= 0x7f;
   }
-  slipFrame[nbytesReceive] |= level << pos;
+  bytes[nbytesReceive] |= level << pos;
 
   //Verifica si comienza transmisión
-  if(!transmissionStartedReceive && slipFrame[nbytesReceive] == 0xC0){
+  if(!transmissionStartedReceive && bytes[nbytesReceive] == 0xC0){
     transmissionStartedReceive = true;
     nbitsReceive = 0;
     nbytesReceive++;
@@ -88,10 +88,10 @@ void processBit(bool level){
   if(transmissionStartedReceive){
     if(nbitsReceive==8){
       nbitsReceive = 0;
-      // printf("0x%x\n", slipFrame[nbytesReceive]);
-      if(slipFrame[nbytesReceive] == 0xC0 && nbytesReceive>0){
+      // printf("0x%x\n", bytes[nbytesReceive]);
+      if(bytes[nbytesReceive] == 0xC0 && nbytesReceive>0){
         transmissionStartedReceive = false;
-        //memcpy((void*)slipFrame, (void*)bytes, nbytesReceive+1);
+        memcpy((void*)slipFrame, (void*)bytes, nbytesReceive+1);
         nbytesReceive = 0;
         frameReceived = true;
         return;
