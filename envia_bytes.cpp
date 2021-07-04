@@ -5,9 +5,9 @@
 #include "slip.h"
 
 //MACROS
-#define CLOCK_PIN_SEND 0
-#define TX_PIN_SEND 2
-#define RX_PIN_SEND 3
+#define clockPin 0
+#define txPin 2
+#define rxPin 3
 
 #define BYTE unsigned char
 
@@ -33,14 +33,14 @@ int main(){
     exit(1);
 
   //CONFIGURA INTERRUPCION PIN CLOCK (PUENTEADO A PIN PWM)
-  if(wiringPiISR(CLOCK_PIN_SEND, INT_EDGE_RISING, &cbSend) < 0){
+  if(wiringPiISR(clockPin, INT_EDGE_RISING, &cbSend) < 0){
     printf("Unable to start interrupt function\n");
   }
   
 
   //CONFIGURA PINES DE ENTRADA SALIDA
-  pinMode(RX_PIN_SEND, INPUT);
-  pinMode(TX_PIN_SEND, OUTPUT);
+  pinMode(rxPin, INPUT);
+  pinMode(txPin, OUTPUT);
 
   //EMPAQUETA EN SLIP
   empaquetaSlip(slipArrayToSend, bytesToSend, 10);
@@ -63,7 +63,7 @@ void cbSend(void){
     }
 
     //Escribe en el pin TX
-    digitalWrite(TX_PIN_SEND, (slipArrayToSend[nbytesSend] >> nbitsSend) & 0x01); //Bit de dato
+    digitalWrite(txPin, (slipArrayToSend[nbytesSend] >> nbitsSend) & 0x01); //Bit de dato
 
     //Actualiza contador de bits
     nbitsSend++;
@@ -83,7 +83,7 @@ void cbSend(void){
     }
   }else{
     //Canal en reposo
-    digitalWrite(TX_PIN_SEND, 1);
+    digitalWrite(txPin, 1);
   }
 }
 

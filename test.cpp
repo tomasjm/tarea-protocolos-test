@@ -24,6 +24,24 @@ bool frameReceived = false;
 BYTE bytesReceived[50];
 BYTE slipArrayReceived[50];
 
+
+//envia 
+
+//DECLARACION DE PROTOTIPOS
+void cbSend(void);
+void startTransmission();
+void printByteArray(BYTE* arr, int len);
+
+//VARIABLES GLOBALES
+volatile int nbitsSend = 0;
+BYTE bytesToSend[10] = {1,2,3,4,5,6,7,8,9,10};
+BYTE slipArrayToSend[20];
+volatile int nbytesSend = 0;
+BYTE len = 10;
+int nones = 0;
+bool transmissionStartedSend = false;
+int endCount = 0;
+
 int main(){
   if(wiringPiSetup() == -1){
     printf("No fue posible iniciar wiring pi\n");
@@ -36,6 +54,9 @@ int main(){
 
   //CONFIGURA INTERRUPCION PIN CLOCK (PUENTEADO A PIN PWM)
   if(wiringPiISR(clockPin, INT_EDGE_FALLING, &cbReceive) < 0){
+    printf("Unable to start interrupt function\n");
+  }
+  if(wiringPiISR(clockPin, INT_EDGE_RISING, &cbSend) < 0){
     printf("Unable to start interrupt function\n");
   }
 
@@ -103,4 +124,47 @@ void processBit(bool level){
       nbytesReceived++;
     }
   }
+}
+
+void cbSend(void){
+  if(transmissionStartedSend){
+    if(endCount == 0 && slipArrayToSend[nbytesSend] != 0xC0){
+      nbytesSend++;
+      return;
+    }
+
+    //Escribe en el pin TX
+    digitalWrite(txPin, (slipArrayToSend[nbytesSend] >> nbitsSend) & 0x01); //Bit de dato
+
+    //Actualiza contador de bits
+    nbitsSend++;
+
+    //Actualiza contador de bytes
+    if(nbitsSend == 8){
+      nbitsSend = 0;
+      endCount += slipArrayToSend[nbytesSend] == 0xC0;
+      //Finaliza la comunicación
+      if(slipArrayToSend[nbytesSend] == 0xC0 && endCount>1){
+        endCount = 0;
+        nbytesSend = 0;
+        transmissionStartedSend = false;
+        return;
+      }
+      nbytesSend++;      
+    }
+  }else{
+    //Canal en reposo
+    digitalWrite(txPin, 1);
+  }
+}
+
+void startTransmission(){
+  transmissionStartedSend = true;
+}
+
+void printByteArray(BYTE* arr, int len){
+  for(int i = 0; i<len; i++){
+    printf("0x%x ", arr[i]);
+  }
+  printf("\n");
 }
