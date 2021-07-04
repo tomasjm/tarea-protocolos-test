@@ -14,7 +14,7 @@
 
 //PROTOTIPOS
 void processBit(bool level);
-void cb(void);
+void cbReceive(void);
 
 //VARIABLES GLOBALES
 volatile int nbitsReceive = 0;
@@ -59,7 +59,7 @@ int main(){
 }
 
 void cbReceive(void){
-  bool level = digitalRead(RX_PIN_SEND);
+  bool level = digitalRead(RX_PIN_RECEIVE);
   processBit(level);
 }
 
