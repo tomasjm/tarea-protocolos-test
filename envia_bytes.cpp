@@ -5,22 +5,22 @@
 #include "slip.h"
 
 //MACROS
-#define CLOCK_PIN 0
-#define TX_PIN 2
-#define RX_PIN 3
+#define CLOCK_PIN_SEND 0
+#define TX_PIN_SEND 2
+#define RX_PIN_SEND 3
 
 #define BYTE unsigned char
 
 //DECLARACION DE PROTOTIPOS
-void cb(void);
+void cbSend(void);
 void startTransmission();
 void printByteArray(BYTE* arr, int len);
 
 //VARIABLES GLOBALES
-volatile int nbits = 0;
-BYTE bytes[10] = {1,2,3,4,5,6,7,8,9,10};
-BYTE slipFrame[20];
-volatile int nbytes = 0;
+volatile int nbitsSend = 0;
+BYTE bytesToSend[10] = {1,2,3,4,5,6,7,8,9,10};
+BYTE slipArrayToSend[20];
+volatile int nbytesSend = 0;
 BYTE len = 10;
 int nones = 0;
 bool transmissionStarted = false;
@@ -33,18 +33,18 @@ int main(){
     exit(1);
 
   //CONFIGURA INTERRUPCION PIN CLOCK (PUENTEADO A PIN PWM)
-  if(wiringPiISR(CLOCK_PIN, INT_EDGE_RISING, &cb) < 0){
+  if(wiringPiISR(CLOCK_PIN_SEND, INT_EDGE_RISING, &cbSend) < 0){
     printf("Unable to start interrupt function\n");
   }
 
   //CONFIGURA PINES DE ENTRADA SALIDA
-  pinMode(RX_PIN, INPUT);
-  pinMode(TX_PIN, OUTPUT);
+  pinMode(RX_PIN_SEND, INPUT);
+  pinMode(TX_PIN_SEND, OUTPUT);
 
   //EMPAQUETA EN SLIP
-  empaquetaSlip(slipFrame, bytes, 10);
+  empaquetaSlip(slipArrayToSend, bytesToSend, 10);
   printf("Paquete slip: ");
-  printByteArray(slipFrame, 20);
+  printByteArray(slipArrayToSend, 20);
   
   //TRANSMITE EL MENSAJE
   startTransmission();
@@ -54,35 +54,35 @@ int main(){
   return 0;
 }
 
-void cb(void){
+void cbSend(void){
   if(transmissionStarted){
-    if(endCount == 0 && slipFrame[nbytes] != 0xC0){
-      nbytes++;
+    if(endCount == 0 && slipArrayToSend[nbytesSend] != 0xC0){
+      nbytesSend++;
       return;
     }
 
     //Escribe en el pin TX
-    digitalWrite(TX_PIN, (slipFrame[nbytes] >> nbits) & 0x01); //Bit de dato
+    digitalWrite(TX_PIN_SEND, (slipArrayToSend[nbytesSend] >> nbitsSend) & 0x01); //Bit de dato
 
     //Actualiza contador de bits
-    nbits++;
+    nbitsSend++;
 
     //Actualiza contador de bytes
-    if(nbits == 8){
-      nbits = 0;
-      endCount += slipFrame[nbytes] == 0xC0;
+    if(nbitsSend == 8){
+      nbitsSend = 0;
+      endCount += slipArrayToSend[nbytesSend] == 0xC0;
       //Finaliza la comunicación
-      if(slipFrame[nbytes] == 0xC0 && endCount>1){
+      if(slipArrayToSend[nbytesSend] == 0xC0 && endCount>1){
         endCount = 0;
-        nbytes = 0;
+        nbytesSend = 0;
         transmissionStarted = false;
         return;
       }
-      nbytes++;      
+      nbytesSend++;      
     }
   }else{
     //Canal en reposo
-    digitalWrite(TX_PIN, 1);
+    digitalWrite(TX_PIN_SEND, 1);
   }
 }
 
