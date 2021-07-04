@@ -54,6 +54,10 @@ int main(int argc, char *args[])
     {
         printf("Unable to start interrupt function\n");
     }
+      //CONFIGURA INTERRUPCION PIN CLOCK (PUENTEADO A PIN PWM)
+  if(wiringPiISR(CLOCK_PIN_RECEIVE, INT_EDGE_FALLING, &cbReceive) < 0){
+    printf("Unable to start interrupt function\n");
+  }
     if (argc > 1 && atoi(args[1]) == 1)
     {
         //EMPAQUETA EN SLIP
