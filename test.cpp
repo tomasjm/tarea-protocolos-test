@@ -48,8 +48,9 @@ int main(int argc, char *args[])
   //INICIA WIRINGPI
   if (wiringPiSetup() == -1)
     exit(1);
-  //wiringPiISR(CLOCK_PIN_SEND, INT_EDGE_RISING, &cbSend);
+  
   wiringPiISR(CLOCK_PIN_RECEIVE, INT_EDGE_FALLING, &cbReceive);
+  wiringPiISR(CLOCK_PIN_SEND, INT_EDGE_RISING, &cbSend);
   if (argc > 1 && atoi(args[1]) == 1)
   {
   }
