@@ -56,9 +56,9 @@ int main(){
   if(wiringPiISR(clockPin, INT_EDGE_BOTH, &cbReceive) < 0){
     printf("Unable to start interrupt function\n");
   }
-  if(wiringPiISR(clockPin, INT_EDGE_BOTH, &cbSend) < 0){
-    printf("Unable to start interrupt function\n");
-  }
+  // if(wiringPiISR(clockPin, INT_EDGE_BOTH, &cbSend) < 0){
+  //   printf("Unable to start interrupt function\n");
+  // }
 
   for(int i = 0; i<50; i++){
     bytesReceived[i] = 0;
