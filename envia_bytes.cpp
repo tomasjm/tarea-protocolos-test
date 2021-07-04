@@ -23,7 +23,7 @@ BYTE slipArrayToSend[20];
 volatile int nbytesSend = 0;
 BYTE len = 10;
 int nones = 0;
-bool transmissionStarted = false;
+bool transmissionStartedSend = false;
 int endCount = 0;
 
 int main(){
@@ -36,6 +36,7 @@ int main(){
   if(wiringPiISR(CLOCK_PIN_SEND, INT_EDGE_RISING, &cbSend) < 0){
     printf("Unable to start interrupt function\n");
   }
+  
 
   //CONFIGURA PINES DE ENTRADA SALIDA
   pinMode(RX_PIN_SEND, INPUT);
@@ -48,14 +49,14 @@ int main(){
   
   //TRANSMITE EL MENSAJE
   startTransmission();
-  while(transmissionStarted)
+  while(transmissionStartedSend)
     delay(2000);
   
   return 0;
 }
 
 void cbSend(void){
-  if(transmissionStarted){
+  if(transmissionStartedSend){
     if(endCount == 0 && slipArrayToSend[nbytesSend] != 0xC0){
       nbytesSend++;
       return;
@@ -75,7 +76,7 @@ void cbSend(void){
       if(slipArrayToSend[nbytesSend] == 0xC0 && endCount>1){
         endCount = 0;
         nbytesSend = 0;
-        transmissionStarted = false;
+        transmissionStartedSend = false;
         return;
       }
       nbytesSend++;      
@@ -87,7 +88,7 @@ void cbSend(void){
 }
 
 void startTransmission(){
-  transmissionStarted = true;
+  transmissionStartedSend = true;
 }
 
 void printByteArray(BYTE* arr, int len){
