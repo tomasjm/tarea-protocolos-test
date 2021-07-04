@@ -52,7 +52,7 @@ int main(){
   //CONFIGURA PINES DE ENTRADA SALIDA
   
   //CONFIGURA INTERRUPCION PIN CLOCK (PUENTEADO A PIN PWM)
-  if(wiringPiISR(clockPin1, INT_EDGE_FALLING, &cbReceive) < 0){
+  if(wiringPiISR(clockPin, INT_EDGE_FALLING, &cbReceive) < 0){
     printf("Unable to start interrupt function\n");
   }
   if(wiringPiISR(clockPin1, INT_EDGE_RISING, &cbSend) < 0){
