@@ -63,10 +63,10 @@ int main(int argc, char *args[])
         exit(1);
 
     //CONFIGURA INTERRUPCION PIN CLOCK (PUENTEADO A PIN PWM)
-    if (wiringPiISR(CLOCK_PIN_SEND, INT_EDGE_RISING, &cbSend) < 0)
-    {
-        printf("Unable to start interrupt function\n");
-    }
+    // if (wiringPiISR(CLOCK_PIN_SEND, INT_EDGE_RISING, &cbSend) < 0)
+    // {
+    //     printf("Unable to start interrupt function\n");
+    // }
     //CONFIGURA INTERRUPCION PIN CLOCK (PUENTEADO A PIN PWM)
     if (wiringPiISR(CLOCK_PIN_RECEIVE, INT_EDGE_FALLING, &cbReceive) < 0)
     {
