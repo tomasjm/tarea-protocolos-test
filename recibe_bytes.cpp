@@ -8,7 +8,7 @@
 //MACROS
 #define CLOCK_PIN_RECEIVE       23
 #define TX_PIN_RECEIVE          22
-#define TX_PIN_RECEIVE          21
+#define RX_PIN_RECEIVE          21
 
 #define BYTE unsigned char
 
@@ -30,7 +30,7 @@ int main(){
   }
   piHiPri(99);
   //CONFIGURA PINES DE ENTRADA SALIDA
-  pinMode(TX_PIN_RECEIVE, INPUT);
+  pinMode(RX_PIN_RECEIVE, INPUT);
   pinMode(TX_PIN_RECEIVE, OUTPUT);
 
   //CONFIGURA INTERRUPCION PIN CLOCK (PUENTEADO A PIN PWM)
