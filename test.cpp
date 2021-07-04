@@ -49,16 +49,16 @@ int main(){
   }
   piHiPri(99);
   //CONFIGURA PINES DE ENTRADA SALIDA
-  pinMode(rxPin, INPUT);
-  pinMode(txPin, OUTPUT);
-
+  
   //CONFIGURA INTERRUPCION PIN CLOCK (PUENTEADO A PIN PWM)
   if(wiringPiISR(clockPin, INT_EDGE_BOTH, &cbReceive) < 0){
     printf("Unable to start interrupt function\n");
   }
-  // if(wiringPiISR(clockPin, INT_EDGE_BOTH, &cbSend) < 0){
-  //   printf("Unable to start interrupt function\n");
-  // }
+  if(wiringPiISR(clockPin, INT_EDGE_BOTH, &cbSend) < 0){
+    printf("Unable to start interrupt function\n");
+  }
+  pinMode(rxPin, INPUT);
+  pinMode(txPin, OUTPUT);
 
   for(int i = 0; i<50; i++){
     bytesReceived[i] = 0;
